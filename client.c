@@ -27,11 +27,32 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	
-	//Initializing structure data
+	//Initializing socket data
 	serverSocket.sin_family = AF_INET;
 	serverSocket.sin_port = htons(PORT);
 	server_socket.sin_addr.s_addr = inet_addr("127.0.0.1"); //localhost
 	
 	
+	//Initialize socket connection
+	if( connect(socketIf,(struct sockaddr)&serverSocket) < 0){
+		printf("Error : Could not connect.\n");
+		close(socket_id);
+		return 1;
+	}
+	
+	//Send name of file
+	if( send(socketId,fileName,strlen(fileName), 0) < 0 ){
+		printf("Error : Could not send file name");
+		return 1;
+	}
+	//TODO  write into file
+	//Recieve data from server
+	while ((bytes_received = read(socket_id, buffer, BUF_SIZE)) > 0){
+		printf("%d", recieved_bytes);
+	}
+	
+	
+		
+		
 	return 0;
 }
