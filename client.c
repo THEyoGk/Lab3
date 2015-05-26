@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
 	memset(buffer, '0', sizeof(buffer));
 	
 	printf("Input file name: ");
-	scanf("%s", filename);
+	scanf("%s", fileName);
 	
 	//Creating socket
 	
@@ -29,14 +29,14 @@ int main(int argc, char* argv[]){
 	
 	//Initializing socket data
 	serverSocket.sin_family = AF_INET;
-	serverSocket.sin_port = htons(PORT);
-	server_socket.sin_addr.s_addr = inet_addr("127.0.0.1"); //localhost
+	serverSocket.sin_port = htons(PORT_NUMBER);
+	serverSocket.sin_addr.s_addr = inet_addr("127.0.0.1"); //localhost
 	
 	
 	//Initialize socket connection
-	if( connect(socketIf,(struct sockaddr)&serverSocket) < 0){
+	if( connect(socketId,(struct sockaddr*)&serverSocket, sizeof(serverSocket)) < 0){
 		printf("Error : Could not connect.\n");
-		close(socket_id);
+		close(socketId);
 		return 1;
 	}
 	
@@ -45,14 +45,30 @@ int main(int argc, char* argv[]){
 		printf("Error : Could not send file name");
 		return 1;
 	}
-	//TODO  write into file
-	//Recieve data from server
-	while ((bytes_received = read(socket_id, buffer, BUF_SIZE)) > 0){
-		printf("%d", recieved_bytes);
+	printf("Filename send.\n");
+	if ((recieved_bytes = read(socketId, buffer, BUFFER_SIZE)) > 0) {
+		file = fopen(fileName, "wb");
+		if (file == NULL) {
+			printf("Error opening file.\n");
+			close(socketId);
+			return 1;
+		}
+		
+		fwrite(buffer, 1, recieved_bytes, file);
+	} else {
+		printf("Error : File not found.\n");
+		close(socketId);
+		return 1;
 	}
 	
+	while ((recieved_bytes = read(socketId, buffer, BUFFER_SIZE)) > 0)
+		fwrite(buffer, 1,recieved_bytes, file);
+
+	if (recieved_bytes < 0)
+		printf("Error : Reading file failed.\n");
 	
-		
-		
+	printf("File reading finished.\n");
+	fclose(file);
+	close(socketId);
 	return 0;
 }
